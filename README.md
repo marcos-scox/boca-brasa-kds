@@ -5,7 +5,10 @@ Aplicação web responsiva para uma lanchonete, com cardápio digital para pedid
 ## Links
 
 - **Site publicado:** [Abrir o site](manus-webdev://adb6cc9d)
+- **GitHub Pages:** [marcos-scox.github.io/boca-brasa-kds](https://marcos-scox.github.io/boca-brasa-kds/)
 - **Repositório público:** [github.com/marcos-scox/boca-brasa-kds](https://github.com/marcos-scox/boca-brasa-kds)
+
+O GitHub Pages publica a versão estática do front-end. Para pedidos persistentes, painel da cozinha e sincronização em tempo real com banco de dados, use o [site completo publicado](manus-webdev://adb6cc9d).
 
 ## Funcionalidades
 

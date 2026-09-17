@@ -24,16 +24,21 @@ O GitHub Pages publica a versão estática do front-end. Para pedidos persistent
 ### Painel da cozinha
 
 - Lista de pedidos ativos atualizada automaticamente a cada 3 segundos.
+- Menu lateral com acesso aos pedidos, configuração e QR Codes por mesa.
 - Cartões com mesa, horário, itens, quantidades e valor total.
+- Busca rápida por número da mesa.
 - Ações para iniciar o preparo, concluir e marcar como entregue.
 - Cores diferentes para cada status.
 - Alerta sonoro opcional para novos pedidos.
 
 ### Painel administrativo
 
-- Configuração do número de WhatsApp da lanchonete.
+- Cadastro do número de WhatsApp oficial que receberá os pedidos.
 - Validação do número no formato internacional, usando apenas dígitos.
-- O número salvo é usado automaticamente nos links de pedido.
+- Geração de QR Code individual para cada mesa.
+- Cada QR Code abre o cardápio já identificado com `?mesa=N`.
+- O cardápio não permite digitar a mesa manualmente: ela vem do QR Code.
+- O cliente acompanha a mesa e o status do pedido pelo botão de acompanhamento.
 
 ## Rotas
 

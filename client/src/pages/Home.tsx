@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Check, ChevronDown, Clock3, Minus, Plus, ShoppingBag, Sparkles, Utensils, X } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Clock3, ExternalLink, Minus, Plus, ShoppingBag, Sparkles, Utensils, X } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
@@ -114,7 +114,8 @@ export default function Home() {
             <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#1d201c] text-xl text-[#e8ff61] shadow-[4px_4px_0_#c8d944]">✦</div>
             <div><div className="font-display text-lg font-black leading-none tracking-[-0.04em]">BOCA & BRASA</div><div className="mt-1 font-mono text-[9px] uppercase tracking-[0.22em] text-[#7c8177]">lanchonete de bairro</div></div>
           </a>
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <a href={`${import.meta.env.BASE_URL}cozinha`} className="hidden items-center gap-1.5 rounded-xl border border-[#d9d3c7] bg-white px-3 py-2 font-display text-[10px] font-bold sm:flex"><ExternalLink size={13} /> Cozinha</a>
             <div className="hidden text-right sm:block"><div className="font-mono text-[9px] uppercase tracking-[0.14em] text-[#7c8177]">sua mesa</div><div className="font-display text-sm font-bold">{table ? `#${table}` : "não definida"}</div></div>
             <button onClick={() => setStatusOpen(true)} className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#d9d3c7] bg-white text-[#1d201c] transition hover:-translate-y-0.5" aria-label="Acompanhar pedido"><Clock3 size={18} /></button>
           </div>

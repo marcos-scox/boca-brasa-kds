@@ -121,13 +121,11 @@ export async function updateOrderStatusRecord(id: number, status: "recebido" | "
   return getOrderRecord(id);
 }
 
-const DEFAULT_WHATSAPP = "5598984808565";
-
 export async function getWhatsappSetting() {
   const db = await getDb();
-  if (!db) return DEFAULT_WHATSAPP;
+  if (!db) return "";
   const result = await db.select().from(settings).where(eq(settings.settingKey, "whatsapp")).limit(1);
-  return result[0]?.value || DEFAULT_WHATSAPP;
+  return result[0]?.value || "";
 }
 
 export async function updateWhatsappSetting(value: string) {

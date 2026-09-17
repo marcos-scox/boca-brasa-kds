@@ -24,7 +24,7 @@ const money = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: 
 
 function getInitialTable() {
   const table = new URLSearchParams(window.location.search).get("mesa");
-  return table?.trim() || localStorage.getItem("lanchonete-table") || "";
+  return table?.trim() || "";
 }
 
 function statusCopy(status?: string) {
@@ -35,7 +35,6 @@ function statusCopy(status?: string) {
 
 export default function Home() {
   const [table, setTable] = useState(getInitialTable);
-  const [tableDraft, setTableDraft] = useState(table);
   const [category, setCategory] = useState("Todos");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -48,10 +47,6 @@ export default function Home() {
     { id: currentOrderId ?? 0 },
     { enabled: Boolean(currentOrderId), refetchInterval: 3000, refetchIntervalInBackground: true },
   );
-
-  useEffect(() => {
-    if (table) localStorage.setItem("lanchonete-table", table);
-  }, [table]);
 
   const filteredProducts = useMemo(() => category === "Todos" ? products : products.filter((product) => product.category === category), [category]);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -70,17 +65,9 @@ export default function Home() {
     setCart((current) => current.flatMap((item) => item.id === id ? (item.quantity + amount > 0 ? [{ ...item, quantity: item.quantity + amount }] : []) : [item]));
   };
 
-  const setTableNumber = (event: React.FormEvent) => {
-    event.preventDefault();
-    const value = tableDraft.trim();
-    if (!value) return;
-    setTable(value);
-  };
-
   const finishOrder = async () => {
     if (!table) {
-      setTableDraft("");
-      toast.error("Informe o número da mesa antes de pedir");
+      toast.error("Escaneie o QR Code da sua mesa para fazer o pedido");
       return;
     }
     if (!cart.length) return;
@@ -94,11 +81,11 @@ export default function Home() {
       setCart([]);
       setCartOpen(false);
       setStatusOpen(true);
-      const phone = settings.data?.whatsapp || "5598984808565";
+      const phone = settings.data?.whatsapp;
       const lines = created.items.map((item) => `${item.quantity}x ${item.name} — ${money(item.priceCents * item.quantity)}`).join("%0A");
       const message = `Olá! Pedido ${created.code}, mesa ${created.tableNumber}.%0A${lines}%0ATotal: ${money(created.totalCents)}`;
-      window.open(`https://wa.me/${phone}?text=${message}`, "_blank", "noopener,noreferrer");
-      toast.success("Pedido enviado para a cozinha");
+      if (phone) window.open(`https://wa.me/${phone}?text=${message}`, "_blank", "noopener,noreferrer");
+      toast.success(phone ? "Pedido enviado para a cozinha" : "Pedido enviado; WhatsApp ainda não foi configurado");
     } catch {
       toast.error("Não foi possível enviar agora. Tente novamente.");
     }
@@ -122,7 +109,7 @@ export default function Home() {
         </div>
       </header>
 
-      {!table && <div className="border-b border-[#d6e776] bg-[#e8ff61]"><form onSubmit={setTableNumber} className="container flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"><div><div className="font-display text-sm font-black uppercase tracking-[-0.02em]">Antes de começar, conte pra gente</div><div className="mt-1 text-xs text-[#596048]">Digite o número da sua mesa para entregarmos tudo certinho.</div></div><div className="flex gap-2"><input value={tableDraft} onChange={(event) => setTableDraft(event.target.value.replace(/\D/g, "").slice(0, 3))} inputMode="numeric" placeholder="Mesa" className="h-11 w-24 rounded-xl border border-[#bbc95b] bg-white px-3 font-display text-center font-bold outline-none ring-[#1d201c] focus:ring-2" aria-label="Número da mesa" /><button className="h-11 rounded-xl bg-[#1d201c] px-4 font-display text-xs font-bold uppercase tracking-[0.08em] text-white transition hover:bg-[#34392f]">Confirmar</button></div></form></div>}
+      {!table && <div className="border-b border-[#d6e776] bg-[#e8ff61]"><div className="container py-4"><div className="font-display text-sm font-black uppercase tracking-[-0.02em]">Aponte a câmera para o QR Code da mesa</div><div className="mt-1 text-xs text-[#596048]">O número da mesa aparece automaticamente quando você escaneia o código.</div></div></div>}
 
       <main className="container pb-32 pt-8 sm:pt-12">
         <section className="relative overflow-hidden rounded-[28px] bg-[#1d201c] px-6 py-8 text-white sm:px-10 sm:py-11">
@@ -140,7 +127,7 @@ export default function Home() {
       {cartCount > 0 && <button onClick={() => setCartOpen(true)} className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-between rounded-2xl bg-[#1d201c] px-5 py-4 text-white shadow-[0_12px_30px_rgba(29,32,28,0.25)] transition hover:-translate-y-1"><span className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#e8ff61] font-display text-xs font-black text-[#1d201c]">{cartCount}</span><span className="font-display text-sm font-bold">Ver meu pedido</span></span><span className="flex items-center gap-2 font-mono text-sm font-bold">{money(totalCents)} <ArrowRight size={16} /></span></button>}
 
       {(cartOpen || statusOpen) && <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#1d201c]/45 p-0 sm:items-center sm:p-5" onClick={() => { setCartOpen(false); setStatusOpen(false); }}><div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-[#f6f2ea] p-5 sm:rounded-[28px] sm:p-7" onClick={(event) => event.stopPropagation()}>
-        {cartOpen && <><div className="flex items-start justify-between"><div><div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#8a8f85]">02 / revisão</div><h2 className="mt-2 font-display text-3xl font-black tracking-[-0.06em]">Seu pedido</h2></div><button onClick={() => setCartOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9d3c7]"><X size={17} /></button></div>{!table && <div className="mt-5 rounded-2xl border border-[#e1c74b] bg-[#fff8d1] p-4 text-sm"><strong>Qual é a sua mesa?</strong><div className="mt-3 flex gap-2"><input value={tableDraft} onChange={(event) => setTableDraft(event.target.value.replace(/\D/g, "").slice(0, 3))} className="h-10 w-20 rounded-lg border border-[#d6c875] bg-white px-3 text-center outline-none" inputMode="numeric" /><button onClick={() => { if (tableDraft.trim()) setTable(tableDraft.trim()); }} className="rounded-lg bg-[#1d201c] px-3 text-xs font-bold text-white">Salvar</button></div></div>}<div className="mt-6 space-y-3">{cart.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white p-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f6f2ea] text-2xl">{item.emoji}</div><div className="min-w-0 flex-1"><div className="truncate font-display text-sm font-bold">{item.name}</div><div className="mt-1 font-mono text-xs text-[#7a8076]">{money(item.priceCents * item.quantity)}</div></div><div className="flex items-center gap-2 rounded-full border border-[#ded8cc] px-2 py-1"><button onClick={() => changeQuantity(item.id, -1)} className="p-1"><Minus size={13} /></button><span className="w-4 text-center font-mono text-xs">{item.quantity}</span><button onClick={() => changeQuantity(item.id, 1)} className="p-1"><Plus size={13} /></button></div></div>)}</div><div className="mt-7 flex items-center justify-between border-t border-[#d9d3c7] pt-5"><span className="font-display text-sm font-bold">Total do pedido</span><span className="font-mono text-xl font-bold">{money(totalCents)}</span></div><button disabled={createOrder.isPending || !table} onClick={finishOrder} className="mt-5 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#1d201c] font-display text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#34392f] disabled:cursor-not-allowed disabled:opacity-50">{createOrder.isPending ? "Enviando…" : "Finalizar pedido"}<ArrowRight size={18} /></button><p className="mt-3 text-center text-[11px] leading-5 text-[#888d83]">Ao finalizar, você também poderá enviar o resumo pelo WhatsApp da lanchonete.</p></>}
+        {cartOpen && <><div className="flex items-start justify-between"><div><div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#8a8f85]">02 / revisão</div><h2 className="mt-2 font-display text-3xl font-black tracking-[-0.06em]">Seu pedido</h2></div><button onClick={() => setCartOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9d3c7]"><X size={17} /></button></div>{!table && <div className="mt-5 rounded-2xl border border-[#e1c74b] bg-[#fff8d1] p-4 text-sm">Este cardápio precisa ser aberto pelo QR Code de uma mesa.</div>}<div className="mt-6 space-y-3">{cart.map((item) => <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white p-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f6f2ea] text-2xl">{item.emoji}</div><div className="min-w-0 flex-1"><div className="truncate font-display text-sm font-bold">{item.name}</div><div className="mt-1 font-mono text-xs text-[#7a8076]">{money(item.priceCents * item.quantity)}</div></div><div className="flex items-center gap-2 rounded-full border border-[#ded8cc] px-2 py-1"><button onClick={() => changeQuantity(item.id, -1)} className="p-1"><Minus size={13} /></button><span className="w-4 text-center font-mono text-xs">{item.quantity}</span><button onClick={() => changeQuantity(item.id, 1)} className="p-1"><Plus size={13} /></button></div></div>)}</div><div className="mt-7 flex items-center justify-between border-t border-[#d9d3c7] pt-5"><span className="font-display text-sm font-bold">Total do pedido</span><span className="font-mono text-xl font-bold">{money(totalCents)}</span></div><button disabled={createOrder.isPending || !table} onClick={finishOrder} className="mt-5 flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#1d201c] font-display text-sm font-black uppercase tracking-[0.08em] text-white transition hover:bg-[#34392f] disabled:cursor-not-allowed disabled:opacity-50">{createOrder.isPending ? "Enviando…" : "Finalizar pedido"}<ArrowRight size={18} /></button><p className="mt-3 text-center text-[11px] leading-5 text-[#888d83]">Mesa {table || "não identificada"} · o resumo será enviado para o WhatsApp configurado.</p></>}
         {statusOpen && <><div className="flex items-start justify-between"><div><div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#8a8f85]">03 / acompanhamento</div><h2 className="mt-2 font-display text-3xl font-black tracking-[-0.06em]">Acompanhe seu pedido</h2></div><button onClick={() => setStatusOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full border border-[#d9d3c7]"><X size={17} /></button></div>{!currentOrderId ? <div className="mt-8 rounded-2xl bg-white p-6 text-center"><div className="text-4xl">🍔</div><div className="mt-3 font-display font-bold">Ainda não há pedido ativo</div><p className="mt-1 text-sm text-[#7a8076]">Seu pedido aparecerá aqui assim que você finalizar.</p></div> : <div className="mt-7"><div className={`rounded-2xl p-5 ${currentStatus.tone === "green" ? "bg-[#d8f1d8]" : currentStatus.tone === "orange" ? "bg-[#ffe1c3]" : "bg-[#fff1a8]"}`}><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70">{currentStatus.tone === "green" ? <Check size={21} /> : <Clock3 size={21} />}</div><div><div className="font-display text-lg font-black">{currentStatus.label}</div><div className="mt-1 text-xs text-[#656d5f]">{currentStatus.note}</div></div></div></div><div className="mt-5 rounded-2xl bg-white p-5"><div className="flex justify-between font-mono text-[10px] uppercase tracking-[0.12em] text-[#8a8f85]"><span>Pedido {order.data?.code || "…"}</span><span>Mesa {order.data?.tableNumber || table}</span></div><div className="mt-4 space-y-2">{order.data?.items.map((item) => <div key={item.id} className="flex justify-between text-sm"><span><strong>{item.quantity}x</strong> {item.name}</span><span className="font-mono text-xs">{money(item.priceCents * item.quantity)}</span></div>)}</div><div className="mt-4 flex justify-between border-t border-[#eee9df] pt-4 font-bold"><span>Total</span><span className="font-mono">{money(order.data?.totalCents || 0)}</span></div></div><button onClick={() => { localStorage.removeItem("lanchonete-order-id"); setCurrentOrderId(null); setStatusOpen(false); }} className="mt-5 w-full text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#8a8f85] underline underline-offset-4">limpar pedido da tela</button></div>}</>}
       </div></div>}
     </div>

@@ -36,10 +36,14 @@ jobs:
       - name: Build static site
         run: pnpm run build
 
+      - name: Configure frontend API
+        run: sed -i 's|</head>|<meta name="api-base-url" content="https://3000-iwjv2q2v91k2w6ombt7qw-5e1b18da.us4.manus.computer" /></head>|' dist/public/index.html
+
+      - name: Add GitHub Pages fallback
+        run: cp dist/public/index.html dist/public/404.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -110,7 +110,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#f6f2ea] text-[#1d201c]">
       <header className="sticky top-0 z-30 border-b border-[#d9d3c7] bg-[#f6f2ea]/95 backdrop-blur">
         <div className="container flex h-[76px] items-center justify-between gap-4">
-          <a href="/" className="flex items-center gap-3" aria-label="Boca & Brasa início">
+            <a href={import.meta.env.BASE_URL} className="flex items-center gap-3" aria-label="Boca & Brasa início">
             <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#1d201c] text-xl text-[#e8ff61] shadow-[4px_4px_0_#c8d944]">✦</div>
             <div><div className="font-display text-lg font-black leading-none tracking-[-0.04em]">BOCA & BRASA</div><div className="mt-1 font-mono text-[9px] uppercase tracking-[0.22em] text-[#7c8177]">lanchonete de bairro</div></div>
           </a>
